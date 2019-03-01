@@ -16,12 +16,13 @@ class CreateUsersTable extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->jsonb('data')->default('{}');
             $table->timestamps();
         });
+
+        \DB::statement('CREATE INDEX users_data_gin_idx 
+                ON "users" 
+                USING gin("data" jsonb_path_ops)');
     }
 
     /**

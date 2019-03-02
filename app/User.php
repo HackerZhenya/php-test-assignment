@@ -11,11 +11,13 @@ class User extends Model
     protected $table = 'users';
 
     protected $attributes = [
-        'data' => '{}'
+        'data' => '{}',
+        'geo_location' => '{}'
     ];
 
     protected $casts = [
         'data' => 'array',
+        'geo_location' => 'array',
     ];
 
     public function getGenderAttribute()
@@ -54,6 +56,17 @@ class User extends Model
     }
 
 
+    public function getGeoPositionAttribute() {
+        return $this->attributes['geo_location'];
+    }
+
+    public function setGeoPositionAttribute($value)
+    {
+        if ($value != null)
+            $this->geo_location = array_merge($this->geo_location, $value);
+    }
+
+
     public function scopeByBirthdayRange(Builder $query, string $from = null, string $to = null)
     {
         if ($from != null && $to != null)
@@ -89,5 +102,18 @@ class User extends Model
 
         $hobbies = '{' . implode(', ', $hobbies) . '}';
         return $query->whereRaw("jsonb_exists_any(data->'hobby', :hobbies) ", ['hobbies' => $hobbies]);
+    }
+
+    public function scopeByGeoLocation(Builder $query, array $nw = null, array $se = null) {
+        // check for right square
+        if ($nw == null && $se == null ||
+            $nw['lat'] <= $se['lat'] ||
+            $nw['lng'] >= $se['lng'])
+            return $query;
+
+        return $query->whereRaw("((geo_location->>'lat')::numeric BETWEEN :se_lat AND :nw_lat) AND ((geo_location->>'lng')::numeric BETWEEN :nw_lng AND :se_lng)", [
+            'se_lat' => (double) $se['lat'], 'nw_lat' => (double) $nw['lat'],
+            'nw_lng' => (double) $nw['lng'], 'se_lng' => (double) $se['lng'],
+        ]);
     }
 }

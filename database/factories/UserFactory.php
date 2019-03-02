@@ -1,7 +1,6 @@
 <?php
 
 use App\User;
-use Illuminate\Support\Str;
 use Faker\Generator as Faker;
 
 /*
@@ -34,6 +33,10 @@ $factory->define(User::class, function (Faker $faker) {
             'cycling',
             'baseball',
             'basketball'
-        ])
+        ]),
+        'geo_position' => [
+            'lat' => $faker->latitude,
+            'lng' => $faker->longitude
+        ]
     ];
 });

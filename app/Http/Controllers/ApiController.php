@@ -11,6 +11,7 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'age.*' => 'numeric',
+            'geo_location.*.*' => 'numeric',
             'gender' => 'in:male,female',
             'hobby' => 'array',
         ]);
@@ -22,6 +23,7 @@ class ApiController extends Controller
         $model = new \App\User;
 
         return $model
+            ->byGeoLocation($data['geo_location']['nw'] ?? null, $data['geo_location']['se'] ?? null)
             ->byAgeRange($data['age']['from'] ?? null, $data['age']['to'] ?? null)
             ->byGender($data['gender'] ?? null)
             ->byHobby($data['hobby'] ?? null)
